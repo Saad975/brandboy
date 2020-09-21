@@ -25,6 +25,11 @@ SECRET_KEY = '_m41(=^oe)$1cqd8aqirx!6ixi@3-q5=g1+6=b0=(q464&n7cc'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    '\brandboy\crawler\static',
+]
+
 ALLOWED_HOSTS = []
 
 

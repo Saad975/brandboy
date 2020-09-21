@@ -17,6 +17,8 @@ class HomeView(FormView):
 
     def post(self, request, *args, **kwargs):
 
+        form = self.get_form_class()
+
         domain = self.get_form()
 
         search = domain.data['post']
@@ -50,7 +52,8 @@ class HomeView(FormView):
                 'firstimg': '',
                 'favicon': '',
                 'curr_web_links': [],
-                'email': []
+                'email': [],
+                'form': form
             }
 
             favicon = []
@@ -58,19 +61,24 @@ class HomeView(FormView):
 
             for link in all_links:
                 if link.has_attr('href'):
-                    if domain_name.domain in link['href'] and 'https://' in link['href'] and link['href'] not in \
-                            context['curr_web_links']:
-                        print(link['href'])
+                    if 'https://' not in link['href']:
+                        link['href'] = urllib.parse.urljoin(search, link['href'])
+                    if domain_name.domain in link['href'] and link['href'] not in context['curr_web_links']:
+                        # print(link['href'])
                         context['curr_web_links'].append(link['href'])
 
             for img in logos:
-                if img.has_attr('data-orig-src'):
+                if 'logo' in img['src']:
+                    logo = img
+                    break
+                elif img.has_attr('data-orig-src'):
                     if 'logo' in img['data-orig-src']:
                         logo = img
                         break
-                elif 'logo' in img['src']:
-                    logo = img
-                    break
+                elif img.has_attr('class'):
+                    if 'logo' in img['class']:
+                        logo = img
+                        break
 
             for fav in favicons:
                 if 'fav' in fav['href']:
@@ -83,6 +91,7 @@ class HomeView(FormView):
                 else:
                     context['logo'] = urllib.parse.urljoin(search, logo['src'])
 
+            if logos:
                 context['firstimg'] = urllib.parse.urljoin(search, logos[0]['src'])
 
             if favicon:
@@ -176,7 +185,8 @@ class HomeView(FormView):
             email = company.companyemail_set.all()
             context = {
                 'logo': logo,
-                'email': email
+                'email': email,
+                'form': form
             }
 
         return self.render_to_response(context)
